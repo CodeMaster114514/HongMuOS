@@ -9,6 +9,7 @@
 [Sources]
     BootLoader/main.c
     BootLoader/GUI.c
+    BootLoader/Protocol.c
 
 [Packages]
     MdePkg/MdePkg.dec

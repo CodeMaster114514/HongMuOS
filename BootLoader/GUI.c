@@ -2,74 +2,34 @@
 
 EFI_STATUS
 EFIAPI
-creat_gop(IN EFI_HANDLE ImageHandle, OUT EFI_GRAPHICS_OUTPUT_PROTOCOL **gop)
+creat_gop(IN EFI_HANDLE ImageHandle, OUT EFI_GRAPHICS_OUTPUT_PROTOCOL ***gop, UINTN *NoHandle)
 {
     EFI_STATUS status = EFI_SUCCESS;
 
     EFI_HANDLE *handle = NULL;
-    UINTN NoHandle = 0;
-    status = gBS->LocateHandleBuffer(
-        ByProtocol,
-        &gEfiGraphicsOutputProtocolGuid,
-        NULL,
-        &NoHandle,
-        &handle);
 
+    status = LocateHandle(&handle, NoHandle, &gEfiGraphicsOutputProtocolGuid, L"GraphicsOutputProtocolGuid");
     if (EFI_ERROR(status))
     {
-        Print(L"Failed to locate handle\n");
-    }
-
-    /*gBS->AllocatePool(
-        EfiRuntimeServicesData,
-        sizeof(EFI_GRAPHICS_OUTPUT_PROTOCOL *) * (*count),
-        (void **)*gop);
-
-    if (EFI_ERROR(status))
-    {
-        Print(L"Failed to alloc pool to save protocol\n");
         return status;
     }
 
-    for (UINTN i = 0; i < *count; ++i)
+    status = gBS->AllocatePool(EfiRuntimeServicesData, sizeof(EFI_GRAPHICS_OUTPUT_PROTOCOL *) * *NoHandle, (void **)gop);
+    if (EFI_ERROR(status))
     {
-        status = gBS->InstallProtocolInterface(
-            handle[i],
-            &gEfiGraphicsOutputProtocolGuid,
-            EFI_NATIVE_INTERFACE,
-            NULL);
-        if (EFI_ERROR(status))
-        {
-            Print(L"Failed install interface in %dth. %p\n", i,handle[0]);
-            return status;
-        }
-
-        status = gBS->OpenProtocol(
-            handle[i],
-            &gEfiGraphicsOutputProtocolGuid,
-            (void **)&(*gop)[i],
-            ImageHandle,
-            NULL,
-            EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        if (EFI_ERROR(status))
-        {
-            Print(L"Failed to open protocol in %dth\n", i);
-            return status;
-        }
-    }*/
-
-    //status = gBS->InstallProtocolInterface(&handle[0],&gEfiGraphicsOutputProtocolGuid,EFI_NATIVE_INTERFACE,NULL);
-    //if(EFI_ERROR(status))
-    //{
-        //Print(L"Failed to install interface\n");
-        //return status;
-    //}
-
-    status = gBS->OpenProtocol(handle[0],&gEfiGraphicsOutputProtocolGuid,(void **)gop,ImageHandle,NULL,EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-    if(EFI_ERROR(status))
-    {
-        Print(L"Failed to open protocol\n");
+        Print(L"Failed to alloc pool %d %d %p\n", status, EFI_INVALID_PARAMETER, (void **)gop);
         return status;
+    }
+
+    EFI_GRAPHICS_OUTPUT_PROTOCOL **GOP = *gop;
+
+    for (UINTN i = 0; i < *NoHandle; ++i)
+    {
+        status = OpenProtocolByHandle(ImageHandle, handle[i], &gEfiGraphicsOutputProtocolGuid, (void **)&GOP[i], L"GraphicsOutputProtocolGuid");
+        if (EFI_ERROR(status))
+        {
+            return status;
+        }
     }
 
     return status;
@@ -89,19 +49,18 @@ set_resolution(IN EFI_GRAPHICS_OUTPUT_PROTOCOL *gop, IN UINTN hight, IN UINTN wi
             i,
             &SizeOfInfo,
             &info);
-        if(EFI_ERROR(status))
+        if (EFI_ERROR(status))
         {
             Print(L"Faild to query mode\n");
             return status;
         }
 
-        if(info->HorizontalResolution == hight && info->VerticalResolution == wight)
+        if (info->HorizontalResolution == hight && info->VerticalResolution == wight)
         {
-            gop->SetMode(gop,
-                i);
-                break;
+            gop->SetMode(gop, i);
+            break;
         }
-        Print(L"Mode %d; H %d;W: %d\n", i, info->HorizontalResolution, info->VerticalResolution);
+        // Print(L"Mode %d; H %d;W: %d\n", i, info->HorizontalResolution, info->VerticalResolution);
     }
     return status;
 }
