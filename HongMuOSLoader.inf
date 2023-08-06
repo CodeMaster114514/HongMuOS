@@ -10,6 +10,9 @@
     BootLoader/main.c
     BootLoader/GUI.c
     BootLoader/Protocol.c
+    BootLoader/IO.c
+    BootLoader/infomation.c
+    BootLoader/memory.c
 
 [Packages]
     MdePkg/MdePkg.dec
@@ -18,3 +21,7 @@
     UefiApplicationEntryPoint
     UefiLib
     UefiBootServicesTableLib
+
+[Protocols]
+    gEfiDiskIo2ProtocolGuid
+    gEfiBlockIo2ProtocolGuid

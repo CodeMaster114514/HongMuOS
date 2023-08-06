@@ -4,35 +4,7 @@ EFI_STATUS
 EFIAPI
 creat_gop(IN EFI_HANDLE ImageHandle, OUT EFI_GRAPHICS_OUTPUT_PROTOCOL ***gop, UINTN *NoHandle)
 {
-    EFI_STATUS status = EFI_SUCCESS;
-
-    EFI_HANDLE *handle = NULL;
-
-    status = LocateHandle(&handle, NoHandle, &gEfiGraphicsOutputProtocolGuid, L"GraphicsOutputProtocolGuid");
-    if (EFI_ERROR(status))
-    {
-        return status;
-    }
-
-    status = gBS->AllocatePool(EfiRuntimeServicesData, sizeof(EFI_GRAPHICS_OUTPUT_PROTOCOL *) * *NoHandle, (void **)gop);
-    if (EFI_ERROR(status))
-    {
-        Print(L"Failed to alloc pool %d %d %p\n", status, EFI_INVALID_PARAMETER, (void **)gop);
-        return status;
-    }
-
-    EFI_GRAPHICS_OUTPUT_PROTOCOL **GOP = *gop;
-
-    for (UINTN i = 0; i < *NoHandle; ++i)
-    {
-        status = OpenProtocolByHandle(ImageHandle, handle[i], &gEfiGraphicsOutputProtocolGuid, (void **)&GOP[i], L"GraphicsOutputProtocolGuid");
-        if (EFI_ERROR(status))
-        {
-            return status;
-        }
-    }
-
-    return status;
+    return CreatProtocols(ImageHandle, &gEfiGraphicsOutputProtocolGuid, NoHandle, (void ***)gop, L"EfiGraphicsOutputProtocol");
 }
 
 EFI_STATUS
