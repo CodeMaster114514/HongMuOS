@@ -12,7 +12,8 @@
     BootLoader/Protocol.c
     BootLoader/IO.c
     BootLoader/infomation.c
-    BootLoader/memory.c
+    BootLoader/enter.c
+    BootLoader/File.c
 
 [Packages]
     MdePkg/MdePkg.dec
@@ -25,3 +26,6 @@
 [Protocols]
     gEfiDiskIo2ProtocolGuid
     gEfiBlockIo2ProtocolGuid
+
+[Guids]
+    gEfiFileInfoGuid

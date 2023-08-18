@@ -1,35 +1,74 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include <Uefi.h>
-#include <Library/UefiLib.h>
-#include <Uefi/UefiBaseType.h>
-#include <Protocol/GraphicsOutput.h>
-#include <Protocol/DiskIo2.h>
-#include <Protocol/BlockIo2.h>
+typedef struct
+{
+	int x;
+	int y;
+} Pointer;
 
 typedef struct
 {
-    UINTN MapSize;
-    EFI_MEMORY_DESCRIPTOR *Map;
-    UINTN MapKey;
-    UINTN DescriptorSize;
-    UINT32 DescriptorVersion;
-} Memory;
+	Pointer start;
+	Pointer end;
+} Frame;
 
 typedef struct
 {
-    UINTN GOP_count;
-    EFI_GRAPHICS_OUTPUT_PROTOCOL **GOP;
+	char bule;
+	char green;
+	char red;
+	char reserved;
+} RGB;
 
-    UINTN DI2_count;
-    EFI_DISK_IO2_PROTOCOL **DI2;
+typedef struct
+{
+	Pointer start;
+	Pointer end;
+	RGB *color;
+} Rectangle;
 
-    UINTN BI2_count;
-    EFI_BLOCK_IO2_PROTOCOL **BI2;
+typedef struct
+{
+	RGB *Frame;
+	unsigned long long FrameBufferSize;
+	unsigned int hight;
+	unsigned int wight;
+} Video;
 
-    Memory *mem;
+typedef struct
+{
+	int line;
+	int col;
+} Cursor;
+
+typedef struct
+{
+	Video vdieo;
 
 } Table;
 
+void undraw_cursor();
+void inc_cursor();
+Pointer get_cursor_at();
+Pointer get_cursor_end_at();
+void draw_cursor();
+void init_vdieo(Video *video);
+void draw_at(Pointer *in, RGB *color);
+void draw_rectangle(Rectangle *out);
+void invert_color(RGB *color);
+void draw_rectangle_invert_color(Pointer *start, Pointer *end);
+void draw_font(Pointer *at, char *font);
+void draw_char(char c);
+void put_char(char c);
+int put_string(const char *str);
+
+void init_shell();
+
+char *number_to_string(int num);
+
+void cursor_next_line();
+void cursor_restart_line();
+
+int print(const char *str, ...);
 #endif

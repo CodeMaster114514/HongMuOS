@@ -5,9 +5,11 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Uefi/UefiBaseType.h>
+#include <Guid/FileInfo.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/DiskIo2.h>
 #include <Protocol/BlockIo2.h>
+#include <Protocol/WiFi2.h>
 #include "../common.h"
 
 EFI_STATUS
@@ -37,6 +39,9 @@ creat_di2(IN EFI_HANDLE ImageHandle, OUT EFI_DISK_IO2_PROTOCOL ***di2, UINTN *No
 EFI_STATUS
 EFIAPI
 creat_bi2(IN EFI_HANDLE ImageHandle, OUT EFI_BLOCK_IO2_PROTOCOL ***bi2, UINTN *NoHAndle);
+EFI_STATUS
+EFIAPI
+creat_wmc2(IN EFI_HANDLE ImageHandle, OUT EFI_WIRELESS_MAC_CONNECTION_II_PROTOCOL ***wmc2, OUT UINTN *NoHandle);
 
 EFI_STATUS
 EFIAPI
@@ -44,6 +49,10 @@ GetAllInfomation(IN OUT Table *table, IN EFI_HANDLE ImageHandle);
 
 EFI_STATUS
 EFIAPI
-GetMemoryInfomation(OUT Memory **mem);
+enter_kernel(IN EFI_HANDLE ImageHandle, OUT Table *table);
+
+EFI_STATUS
+EFIAPI
+OpenFile(IN EFI_HANDLE ImageHandle, IN CHAR16 *PATH, OUT EFI_PHYSICAL_ADDRESS *address);
 
 #endif
