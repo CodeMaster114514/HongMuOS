@@ -97,7 +97,14 @@ enter_kernel(IN EFI_HANDLE ImageHandle, IN Table *table)
 	status = LoadSeg((void *)kernel, &kernel_entry);
 	if (EFI_ERROR(status))
 	{
-		Print(L"Failed to load segements");
+		Print(L"Failed to load segements\n");
+		return status;
+	}
+
+	gBS->ExitBootServices(ImageHandle, table->map.MapKey);
+	if (EFI_ERROR(status))
+	{
+		Print(L"Failed to exit boot services\n");
 		return status;
 	}
 

@@ -6,8 +6,12 @@ int kernel(Table *table)
 	init_shell();
 
 	print("Welcome to HongMuOS\n");
-	print("%d\n", table->vdieo.hight);
+
+	InitMemory(&table->map);
+	print("Total memory: %dMiB\n", GetTotalMemory() / 1048576);
 
 	for (;;)
-	{}
+	{
+		asm("hlt\n");
+	}
 }

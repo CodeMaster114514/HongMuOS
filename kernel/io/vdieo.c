@@ -15,7 +15,7 @@ void init_vdieo(Video *video)
 {
 	video_main = video;
 	RGB background = {.red = 0, .green = 0, .bule = 0, .reserved = 0xff};
-	draw_rectangle(&(Rectangle){.color = &background, .start.x = 0, .start.y = 0, .end.x = video_main->wight, .end.y = video_main->hight});
+	//draw_rectangle(&(Rectangle){.color = &background, .start.x = 0, .start.y = 0, .end.x = video_main->wight, .end.y = video_main->hight});
 }
 
 void draw_at(Pointer *in, RGB *color)
