@@ -8,7 +8,7 @@ int kernel(Table *table)
 	print("Welcome to HongMuOS\n");
 
 	InitMemory(&table->map);
-	print("Total memory: %dMiB\n", GetTotalMemory() / 1048576);
+	print("Total memory: %dMiB\n", GetTotalMemory() / 1024 / 1024);
 
 	for (;;)
 	{

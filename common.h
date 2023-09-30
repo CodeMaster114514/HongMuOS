@@ -28,8 +28,8 @@ typedef enum
 	OsData,
 	OsCode,
 	MMIO,
-	Convention,
 	ACPI,
+	Reserved,
 	UEFI
 } OS_MEMORY_TYPE;
 
@@ -107,11 +107,16 @@ typedef struct
 	MemoryMap map;
 } Table;
 
+// in cursor.c
 void undraw_cursor();
 void inc_cursor();
 Pointer get_cursor_at();
 Pointer get_cursor_end_at();
 void draw_cursor();
+void cursor_next_line();
+void cursor_restart_line();
+
+// in vdieo.c
 void init_vdieo(Video *video);
 void draw_at(Pointer *in, RGB *color);
 void draw_rectangle(Rectangle *out);
@@ -121,17 +126,27 @@ void draw_font(Pointer *at, char *font);
 void draw_char(char c);
 void put_char(char c);
 int put_string(const char *str);
+void clean_all();
 
+// in shell.c
 void init_shell();
 
+// in num.c
 char *number_to_string(unsigned long long num);
 char *number_to_hex_string(unsigned long long num);
 
-void cursor_next_line();
-void cursor_restart_line();
-
+// in print.c
 int print(const char *str, ...);
 
+// in memory.c
 int InitMemory(MemoryMap *map);
 unsigned long long GetTotalMemory();
+
+// in io.c
+unsigned char io_in8(short port);
+unsigned short io_in16(short port);
+unsigned int io_in32(short port);
+void io_out8(short port, unsigned char data);
+void io_out16(short port, unsigned short data);
+void io_out32(short port, unsigned int data);
 #endif

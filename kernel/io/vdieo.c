@@ -14,8 +14,7 @@ static RGB get_color(Pointer *at)
 void init_vdieo(Video *video)
 {
 	video_main = video;
-	RGB background = {.red = 0, .green = 0, .bule = 0, .reserved = 0xff};
-	//draw_rectangle(&(Rectangle){.color = &background, .start.x = 0, .start.y = 0, .end.x = video_main->wight, .end.y = video_main->hight});
+	clean_all();
 }
 
 void draw_at(Pointer *in, RGB *color)
@@ -149,4 +148,10 @@ int put_string(const char *str)
 		c = str[++i];
 	}
 	return i;
+}
+
+void clean_all()
+{
+	RGB background = {.red = 0, .green = 0, .bule = 0, .reserved = 0xff};
+	draw_rectangle(&(Rectangle){.color = &background, .start.x = 0, .start.y = 0, .end.x = video_main->wight, .end.y = video_main->hight});
 }

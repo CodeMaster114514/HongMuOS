@@ -6,7 +6,7 @@ struct
 	unsigned long long DescriptCount;
 	unsigned long long MapSize;
 	unsigned long long TotalMemory;
-} OsMemoryMap = {0};
+} OsMemoryMap;
 
 int InitMemory(MemoryMap *map)
 {
@@ -27,11 +27,11 @@ int InitMemory(MemoryMap *map)
 	unsigned long long OsMemoryAt = 0;
 	for (unsigned long long i = 0; i < EfiDescriptCount; ++i)
 	{
-		if (map->MemoryMap[i].type == EfiBootServicesCode || map->MemoryMap[i].type == EfiBootServicesData)
+		if (map->MemoryMap[i].type == EfiBootServicesCode || map->MemoryMap[i].type == EfiBootServicesData || map->MemoryMap[i].type == EfiConventionalMemory)
 		{
 			OsMemoryMap.map[OsMemoryAt].type = FreeMemory;
 		}
-		else if (map->MemoryMap[i].type == EfiMemoryMappedIO)
+		else if (map->MemoryMap[i].type == EfiMemoryMappedIO || map->MemoryMap[i].type == EfiMemoryMappedIOPortSpace)
 		{
 			OsMemoryMap.map[OsMemoryAt].type = MMIO;
 		}
@@ -43,17 +43,13 @@ int InitMemory(MemoryMap *map)
 		{
 			OsMemoryMap.map[OsMemoryAt].type = OsData;
 		}
-		else if (map->MemoryMap[i].type == EfiReservedMemoryType)
-		{
-			OsMemoryMap.map[OsMemoryAt].type = FreeMemory;
-		}
 		else if (map->MemoryMap[i].type == EfiACPIMemoryNVS || map->MemoryMap[i].type == EfiACPIReclaimMemory)
 		{
 			OsMemoryMap.map[OsMemoryAt].type = ACPI;
 		}
-		else if (map->MemoryMap[i].type == EfiConventionalMemory)
+		else if (map->MemoryMap[i].type == EfiReservedMemoryType)
 		{
-			OsMemoryMap.map[OsMemoryAt].type = Convention;
+			OsMemoryMap.map[OsMemoryAt].type = Reserved;
 		}
 		else
 		{
@@ -62,17 +58,19 @@ int InitMemory(MemoryMap *map)
 		OsMemoryMap.map[OsMemoryAt].PhysicalStart = map->MemoryMap[i].PhysicalStart;
 		OsMemoryMap.map[OsMemoryAt].VirtualStart = map->MemoryMap[i].VirtualStart;
 		OsMemoryMap.map[OsMemoryAt].NumberOfPages = map->MemoryMap[i].NumberOfPages;
-		if (i > 0 && OsMemoryMap.map[OsMemoryAt].type == OsMemoryMap.map[OsMemoryAt - 1].type && OsMemoryMap.map[OsMemoryAt].PhysicalStart == OsMemoryMap.map[OsMemoryAt - 1].PhysicalStart + (OsMemoryMap.map[OsMemoryAt - 1].NumberOfPages << 12))
-		{	
-			OsMemoryMap.map[OsMemoryAt - 1].NumberOfPages += OsMemoryMap.map[OsMemoryAt].NumberOfPages;
-			continue;
-		}
+		if (i > 0 && OsMemoryMap.map[OsMemoryAt].type == OsMemoryMap.map[OsMemoryAt - 1].type)
+			if (OsMemoryMap.map[OsMemoryAt].PhysicalStart == OsMemoryMap.map[OsMemoryAt - 1].PhysicalStart + (OsMemoryMap.map[OsMemoryAt - 1].NumberOfPages << 12))
+			{
+				OsMemoryMap.map[OsMemoryAt - 1].NumberOfPages += OsMemoryMap.map[OsMemoryAt].NumberOfPages;
+				continue;
+			}
 		++OsMemoryAt;
 	}
 	OsMemoryMap.DescriptCount = OsMemoryAt + 1;
-	for (unsigned long long i = 0;i < OsMemoryMap.DescriptCount;++i)
+	OsMemoryMap.TotalMemory = 0;
+	for (unsigned long long i = 0; i < OsMemoryMap.DescriptCount; ++i)
 	{
-		if (OsMemoryMap.map[i].type != MMIO && OsMemoryMap.map[i].type != UEFI && OsMemoryMap.map[i].type != ACPI)
+		if (OsMemoryMap.map[i].type != MMIO && OsMemoryMap.map[i].type != Reserved)
 		{
 			OsMemoryMap.TotalMemory += OsMemoryMap.map[i].NumberOfPages << 12;
 		}
