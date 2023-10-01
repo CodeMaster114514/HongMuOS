@@ -1,6 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#ifndef Loader
 typedef enum
 {
 	EfiReservedMemoryType,
@@ -21,6 +22,7 @@ typedef enum
 	EfiUnacceptedMemoryType,
 	EfiMaxMemoryType
 } EFI_MEMORY_TYPE;
+#endif
 
 typedef enum
 {
@@ -103,8 +105,112 @@ typedef struct
 
 typedef struct
 {
+	unsigned char type;
+	unsigned char len;
+	unsigned char processID;
+	unsigned char ACPI_ID;
+	unsigned int flags;
+} LACPI;
+
+typedef struct
+{
+	unsigned char type;
+	unsigned char len;
+	unsigned char IO_ID;
+	unsigned char reserved;
+	unsigned int IO_ADDRESS;
+} ACPI_IO;
+
+typedef struct
+{
+	char signature[4];
+	unsigned int len;
+	unsigned char revision;
+	unsigned char checksum;
+	struct
+	{
+		unsigned short ID[6];
+		unsigned long long table_ID;
+		unsigned int revision;
+	} OEM;
+	struct
+	{
+		unsigned int ID;
+		unsigned int revision;
+	} Creator;
+	unsigned int LICA; // 中断控制地址
+	unsigned int flags;
+} MADT;
+
+typedef struct
+{
+	char signature[4];
+	unsigned int len;
+	unsigned char revision;
+	unsigned char checksum;
+	struct
+	{
+		unsigned short ID[6];
+		unsigned long long table_ID;
+		unsigned int revision;
+	} OEM;
+	struct
+	{
+		unsigned int ID;
+		unsigned int revision;
+	} Creator;
+	void *enters_start[];
+} XSDT;
+
+typedef struct
+{
+	char signature[4];
+	unsigned int len;
+	unsigned char revision;
+	unsigned char checksum;
+	struct
+	{
+		unsigned short ID[6];
+		unsigned long long table_ID;
+		unsigned int revision;
+	} OEM;
+	struct
+	{
+		unsigned int ID;
+		unsigned int revision;
+	} Creator;
+	unsigned int enters[];
+} RSDT;
+
+typedef struct
+{
+	union page
+	{
+		void *pages;
+		unsigned long long data;
+	} *pages[4096 / sizeof(union pages*)];
+} PT;
+
+typedef struct
+{
+	PT *pt[4096 / sizeof(PT *)];
+} PD;
+
+typedef struct
+{
+	PD *pd[4096 / sizeof(PD *)];
+} PDPT;
+
+typedef struct
+{
+	PDPT *pdpt[4096 / sizeof(PDPT *)];
+} PML4;
+
+typedef struct
+{
 	Video vdieo;
 	MemoryMap map;
+	RSDT *rsdt;
 } Table;
 
 // in cursor.c
@@ -141,6 +247,7 @@ int print(const char *str, ...);
 // in memory.c
 int InitMemory(MemoryMap *map);
 unsigned long long GetTotalMemory();
+unsigned long long GetTotalFreeMemory();
 
 // in io.c
 unsigned char io_in8(short port);
@@ -149,4 +256,5 @@ unsigned int io_in32(short port);
 void io_out8(short port, unsigned char data);
 void io_out16(short port, unsigned short data);
 void io_out32(short port, unsigned int data);
+unsigned long long get_cr3();
 #endif

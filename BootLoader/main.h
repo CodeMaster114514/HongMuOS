@@ -1,5 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
+#define Loader
 
 #include <Uefi.h>
 #include <Library/UefiLib.h>

@@ -9,6 +9,7 @@ int kernel(Table *table)
 
 	InitMemory(&table->map);
 	print("Total memory: %dMiB\n", GetTotalMemory() / 1024 / 1024);
+	print("Total free memory: %dMiB\n", GetTotalFreeMemory() / 1024 /1024);
 
 	for (;;)
 	{

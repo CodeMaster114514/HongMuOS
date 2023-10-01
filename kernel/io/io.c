@@ -71,3 +71,14 @@ void io_out32(short port, unsigned int data)
 		:"m"(data), "m"(port)
 	);
 }
+
+unsigned long long get_cr3()
+{
+	unsigned long long data;
+	asm(
+		"mov rax, cr3\n\t"
+		"mov %0, rax"
+		:"=m"(data)
+	);
+	return data;
+}

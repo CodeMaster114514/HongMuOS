@@ -6,7 +6,38 @@ struct
 	unsigned long long DescriptCount;
 	unsigned long long MapSize;
 	unsigned long long TotalMemory;
+	unsigned long long TotalFreeMemory;
 } OsMemoryMap;
+
+void uninstallPage(void *address)
+{
+	PML4 *pml4 = (void *)(get_cr3() & 0xfffffffffffff000);
+	unsigned long long offset = (unsigned long long)address >> 39;
+	PDPT *pdpt = (void *)((unsigned long long)pml4->pdpt[offset] & 0xfffffffffffff000);
+	offset = ((unsigned long long)address >> 30) & 0b111111111;
+	PD *pd = (void *)((unsigned long long)pdpt->pd[offset] & 0xfffffffffffff000);
+	offset = ((unsigned long long)address >> 21) & 0b111111111;
+	PT *pt = (void *)((unsigned long long)pd->pt[offset] & 0xfffffffffffff000);
+	offset = ((unsigned long long)address >> 12) & 0b111111111;
+	pt->pages[offset]->data &= 0xfffffffffffffffe;
+}
+
+void UninstallFreeMemory()
+{
+	for (unsigned long long i = 0; i < OsMemoryMap.DescriptCount; ++i)
+	{
+		if (OsMemoryMap.map[i].type == FreeMemory)
+		{
+			for (unsigned long long j = 0; j < OsMemoryMap.map[i].NumberOfPages; ++j)
+			{
+				void *Vadd = OsMemoryMap.map[i].VirtualStart;
+				uninstallPage(Vadd);
+				Vadd += 4096;
+			}
+			OsMemoryMap.map[i].VirtualStart = 0;
+		}
+	}
+}
 
 int InitMemory(MemoryMap *map)
 {
@@ -21,6 +52,7 @@ int InitMemory(MemoryMap *map)
 		{
 			OsMemoryMap.map = (void *)map->MemoryMap[i].PhysicalStart;
 			OsMemoryMap.MapSize = map->MemoryMap[i].NumberOfPages << 12;
+			map->MemoryMap[i].type = EfiLoaderData;
 			break;
 		}
 	}
@@ -68,16 +100,24 @@ int InitMemory(MemoryMap *map)
 	}
 	OsMemoryMap.DescriptCount = OsMemoryAt + 1;
 	OsMemoryMap.TotalMemory = 0;
+	OsMemoryMap.TotalFreeMemory = 0;
 	for (unsigned long long i = 0; i < OsMemoryMap.DescriptCount; ++i)
 	{
 		if (OsMemoryMap.map[i].type != MMIO && OsMemoryMap.map[i].type != Reserved)
 		{
 			OsMemoryMap.TotalMemory += OsMemoryMap.map[i].NumberOfPages << 12;
+			OsMemoryMap.TotalFreeMemory += OsMemoryMap.map[i].type == FreeMemory ? OsMemoryMap.map[i].NumberOfPages << 12 : 0;
 		}
 	}
+	UninstallFreeMemory();
 }
 
 unsigned long long GetTotalMemory()
 {
 	return OsMemoryMap.TotalMemory;
+}
+
+unsigned long long GetTotalFreeMemory()
+{
+	return OsMemoryMap.TotalFreeMemory;
 }

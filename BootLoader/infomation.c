@@ -1,4 +1,5 @@
 #include "main.h"
+#include <Guid/Acpi.h>
 
 EFI_STATUS
 EFIAPI
@@ -59,6 +60,13 @@ GetAllInfomation(IN OUT Table *table, IN EFI_HANDLE ImageHandle)
 	status = GetMemoryMap(&MapSize, &map, &MapKey, &DescriptSize, &DescriptVersion);
 	if (EFI_ERROR(status))
 	{
+		return status;
+	}
+
+	status = EfiGetSystemConfigurationTable(&gEfiAcpiTableGuid, (void **) &table->rsdt);
+	if (EFI_ERROR(status))
+	{
+		Print(L"Failed to get RSDT address");
 		return status;
 	}
 
