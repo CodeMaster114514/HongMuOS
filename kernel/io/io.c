@@ -82,3 +82,21 @@ unsigned long long get_cr3()
 	);
 	return data;
 }
+
+void get_gdtr(GDTR *gdtr)
+{
+	asm(
+		"mov rbx, %0\n\t"
+		"sgdt [rbx]\n\t"
+		:"=m"(gdtr)
+	);
+}
+
+void get_idtr(IDTR *idtr)
+{
+	asm(
+		"mov rbx, %0\n\t"
+		"sidt [rbx]\n\t"
+		:"=m"(idtr)
+	);
+}

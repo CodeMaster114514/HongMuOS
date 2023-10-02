@@ -220,6 +220,40 @@ typedef struct
 	RSDT *rsdt;
 } Table;
 
+typedef struct
+{
+	unsigned short limit;
+	unsigned short base_low;
+	unsigned char base_higt_1;
+	unsigned char access;
+	unsigned char FL; // Flag and Limit
+	unsigned char base_high_2;
+} __attribute__((packed)) GDT;
+
+
+typedef struct
+{
+	unsigned short offset_low;
+	unsigned short SS; // Segment Selector
+	unsigned char reserved_1;
+	unsigned char TF; // Type and Flag
+	unsigned short offset_high_1;
+	unsigned int offset_high_2;
+	unsigned int reserved_2;
+} __attribute__((packed)) IDT;
+
+typedef struct
+{
+	unsigned short len;
+	GDT *gdt;
+} __attribute__((packed)) GDTR;
+
+typedef struct
+{
+	unsigned short len;
+	IDT *idt;
+} __attribute__((packed)) IDTR;
+
 // in cursor.c
 void undraw_cursor();
 void inc_cursor();
@@ -257,6 +291,8 @@ unsigned long long GetTotalMemory();
 unsigned long long GetTotalFreeMemory();
 void *alloc_page(char type, OS_MEMORY_TYPE OMT);
 void free_page(void *address);
+void *alloc_os_data(unsigned long long len);
+void free(void *p);
 
 // in io.c
 unsigned char io_in8(short port);
@@ -266,4 +302,6 @@ void io_out8(short port, unsigned char data);
 void io_out16(short port, unsigned short data);
 void io_out32(short port, unsigned int data);
 unsigned long long get_cr3();
+void get_gdtr(GDTR *gdtr);
+void get_idtr(IDTR *idtr);
 #endif

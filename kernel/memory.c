@@ -8,6 +8,7 @@ struct
 	unsigned long long TotalMemory;
 	unsigned long long TotalFreeMemory;
 	void *next_write;
+	GDTR *gdtr;
 } OsMemoryMap;
 
 #define findDescriptAndChangeIt(p, size, dtype)                            \
@@ -248,6 +249,8 @@ int InitMemory(MemoryMap *map)
 		now = now->next;
 	}
 	CheckVirtualMemory();
+	OsMemoryMap.gdtr = alloc_os_data(sizeof(GDTR));
+	get_gdtr(OsMemoryMap.gdtr);
 }
 
 unsigned long long GetTotalMemory()
@@ -290,7 +293,6 @@ void *find_free_virtual_address_from_PDPT(PDPT *pdpt)
 	for (unsigned long long i = 0; i < 4096 / sizeof(PD *); ++i)
 	{
 		void *address = find_free_virtual_address_from_PD((void *)((unsigned long long)pdpt->pd[i] & 0xfffffffffffff000));
-		print("%p\n", address);
 		if (address != (void *)-1)
 		{
 			return (void *)((i << 30) + address);
@@ -328,4 +330,85 @@ void *alloc_page(char type, OS_MEMORY_TYPE OMT)
 void free_page(void *address)
 {
 	uninstall_page_at(address);
+}
+
+typedef struct
+{
+	unsigned long long len;
+	char have;
+	char targe[];
+} Heap;
+
+typedef struct
+{
+	Heap *heaps[4096 / sizeof(Heap *)];
+} HeapHeader;
+
+HeapHeader *header = (void *) -1;
+
+void clean_page(void *p)
+{
+	unsigned long long *data = p;
+	for (int i = 0; i < 4096 / 8; i += 8)
+	{
+		data[i] = 0;
+	}
+}
+
+void LeftDataByByte(unsigned long long offset, void *p, unsigned long long len)
+{
+	char *targe = p - offset;
+	char *data = p;
+	for (unsigned long long i = 0; i < len; ++i)
+	{
+		targe[i] = data[i];
+	}
+}
+
+void *alloc_os_data(unsigned long long len)
+{
+	if (header == (void *)-1)
+	{
+		header = alloc_page(0x07, OsData);
+		clean_page(header);
+		header->heaps[0] = alloc_page(0x07, OsData);
+		clean_page(header->heaps[0]);
+	}
+	for (int i = 0; i < 4096 / sizeof(Heap *); ++i)
+	{
+		Heap *heap = header->heaps[i];
+		char done = 0;
+		while (1)
+		{
+			if (heap - header->heaps[i] >= 0x1000)
+			{
+				break;
+			}
+			if ((!heap->have) && heap->len == 0)
+			{
+				heap->len = len;
+				break;
+			}
+			if ((!heap->have) && heap->len > len)
+			{
+				int offset = heap->len - len;
+				int len = header->heaps[i] + 0x1000 - heap;
+				LeftDataByByte(offset, heap + heap->len, len);
+				heap->len = len;
+				break;
+			}
+			heap += heap->len;
+		}
+		if (done)
+		{
+			return heap->targe;
+		}
+	}
+	return 0;
+}
+
+void free(void *p)
+{
+	Heap *heap = p - sizeof(Heap);
+	heap->have = 0;
 }
