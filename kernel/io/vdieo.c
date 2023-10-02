@@ -1,10 +1,13 @@
 #include "common.h"
 
-extern char systemFont[16];
+extern char systemFont[255][16];
 extern Frame shell_frame;
 
 Video *video_main;
 extern Cursor cursor;
+
+static RGB background;
+static RGB text_color;
 
 static RGB get_color(Pointer *at)
 {
@@ -14,6 +17,8 @@ static RGB get_color(Pointer *at)
 void init_vdieo(Video *video)
 {
 	video_main = video;
+	background = (RGB){.red = 0, .green = 0, .bule = 0, .reserved = 0xff};
+	text_color = (RGB){.red = 0xff, .green = 0xff, .bule = 0xff, .reserved = 0xff};
 	clean_all();
 }
 
@@ -62,59 +67,83 @@ void draw_font(Pointer *at, char *font)
 		data = font[i];
 		if (data & 0b10000000)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 0, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 0, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b01000000)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 1, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 1, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00100000)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 2, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 2, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00010000)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 3, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 3, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00001000)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 4, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 4, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00000100)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 5, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 5, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00000010)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 6, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 6, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 		if (data & 0b00000001)
 		{
-			RGB color = get_color(at);
-			invert_color(&color);
 			Pointer draw_p = {.x = at->x + 7, .y = at->y + i};
-			draw_at(&draw_p, &color);
+			draw_at(&draw_p, &text_color);
+		}
+		else
+		{
+			Pointer draw_p = {.x = at->x + 7, .y = at->y + i};
+			draw_at(&draw_p, &background);
 		}
 	}
 }
@@ -123,7 +152,7 @@ void draw_char(char c)
 {
 	Pointer cursor_at = get_cursor_at();
 	inc_cursor();
-	draw_font(&cursor_at, systemFont + c * 16);
+	draw_font(&cursor_at, systemFont[c]);
 }
 
 void put_char(char c)
@@ -152,6 +181,5 @@ int put_string(const char *str)
 
 void clean_all()
 {
-	RGB background = {.red = 0, .green = 0, .bule = 0, .reserved = 0xff};
 	draw_rectangle(&(Rectangle){.color = &background, .start.x = 0, .start.y = 0, .end.x = video_main->wight, .end.y = video_main->hight});
 }

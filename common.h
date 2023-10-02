@@ -29,6 +29,8 @@ typedef enum
 	FreeMemory,
 	OsData,
 	OsCode,
+	UserData,
+	UserCode,
 	MMIO,
 	ACPI,
 	Reserved,
@@ -45,13 +47,16 @@ typedef struct
 	unsigned int space;
 } MemoryDescript;
 
-typedef struct
+typedef struct OMD OsMemoryDescript;
+
+struct OMD
 {
 	int type;
 	void *PhysicalStart;
 	void *VirtualStart;
 	unsigned long long NumberOfPages;
-} OsMemoryDescript;
+	OsMemoryDescript *next;
+};
 
 typedef struct
 {
@@ -182,13 +187,15 @@ typedef struct
 	unsigned int enters[];
 } RSDT;
 
+typedef union
+{
+	void *page;
+	unsigned long long data;
+} PTE;
+
 typedef struct
 {
-	union page
-	{
-		void *pages;
-		unsigned long long data;
-	} *pages[4096 / sizeof(union pages*)];
+	PTE pte[4096 / sizeof(union pte *)];
 } PT;
 
 typedef struct
@@ -248,6 +255,8 @@ int print(const char *str, ...);
 int InitMemory(MemoryMap *map);
 unsigned long long GetTotalMemory();
 unsigned long long GetTotalFreeMemory();
+void *alloc_page(char type, OS_MEMORY_TYPE OMT);
+void free_page(void *address);
 
 // in io.c
 unsigned char io_in8(short port);
