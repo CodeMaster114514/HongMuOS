@@ -4,7 +4,7 @@ ARCHITECTURE= X64
 INCLUDE= -I./
 MOD= -e kernel -nostdlib -no-pie -m64 -masm=intel
 OUT_DIR= Build
-OBJ= $(OUT_DIR)/vdieo.o $(OUT_DIR)/shell.o $(OUT_DIR)/asciidata.o $(OUT_DIR)/cursor.o $(OUT_DIR)/print.o $(OUT_DIR)/num.o $(OUT_DIR)/memory.o $(OUT_DIR)/io.o $(OUT_DIR)/interrupt.o
+OBJ= $(OUT_DIR)/vdieo.o $(OUT_DIR)/shell.o $(OUT_DIR)/asciidata.o $(OUT_DIR)/cursor.o $(OUT_DIR)/print.o $(OUT_DIR)/num.o $(OUT_DIR)/memory.o $(OUT_DIR)/io.o $(OUT_DIR)/interrupt.o $(OUT_DIR)/keyboard.o
 
 all: Build/DEBUG_GCC5/$(ARCHITECTURE)/HongMuOSLoader.efi Build/kernel
 
@@ -40,6 +40,9 @@ $(OUT_DIR)/io.o: kernel/io/io.c common.h
 
 $(OUT_DIR)/interrupt.o: kernel/interrupt.c common.h
 	$(COMPILER) $(INCLUDE) kernel/interrupt.c $(MOD) -mgeneral-regs-only -c -o Build/interrupt.o
+
+$(OUT_DIR)/keyboard.o: kernel/keyboard.c common.h
+	$(COMPILER) $(INCLUDE) kernel/keyboard.c $(MOD) -mgeneral-regs-only -c -o Build/keyboard.o
 
 clean:
 	rm Build/kernel $(OBJ) -rf

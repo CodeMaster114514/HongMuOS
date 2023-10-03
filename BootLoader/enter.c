@@ -19,7 +19,7 @@ Bool CheckElf(void *file)
 	return isElf;
 }
 
-EFI_STATUS LoadSeg(void *kernel, Kernel *entry)
+EFI_STATUS LoadSeg(void *kernel, Kernel *entry, void *offset_out)
 {
 	EFI_STATUS status;
 	Elf64_Ehdr *ElfHeader = (Elf64_Ehdr *)kernel;
@@ -74,6 +74,7 @@ EFI_STATUS LoadSeg(void *kernel, Kernel *entry)
 	}
 
 	*entry = (Kernel) ElfHeader->e_entry + offset;
+	offset_out = (void *) offset;
 
 	return status;
 }
@@ -94,7 +95,7 @@ enter_kernel(IN EFI_HANDLE ImageHandle, IN Table *table)
 
 	Kernel kernel_entry;
 
-	status = LoadSeg((void *)kernel, &kernel_entry);
+	status = LoadSeg((void *)kernel, &kernel_entry, &table->offset);
 	if (EFI_ERROR(status))
 	{
 		Print(L"Failed to load segements\n");

@@ -11,6 +11,9 @@ int kernel(Table *table)
 	print("Total memory: %dMiB\n", GetTotalMemory() / 1024 / 1024);
 	print("Total free memory: %dMiB\n", GetTotalFreeMemory() / 1024 / 1024);
 
+	InitInterrupt();
+	InitKeyboard();
+
 	for (;;)
 	{
 		asm("hlt\n");

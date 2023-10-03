@@ -217,6 +217,7 @@ typedef struct
 {
 	Video vdieo;
 	MemoryMap map;
+	void *offset;
 	RSDT *rsdt;
 } Table;
 
@@ -235,11 +236,11 @@ typedef struct
 {
 	unsigned short offset_low;
 	unsigned short SS; // Segment Selector
-	unsigned char reserved_1;
+	unsigned char ist; // 0~2 is IST 3~7 is Reserved
 	unsigned char TF; // Type and Flag
 	unsigned short offset_high_1;
 	unsigned int offset_high_2;
-	unsigned int reserved_2;
+	unsigned int reserved;
 } __attribute__((packed)) IDT;
 
 typedef struct
@@ -254,6 +255,8 @@ typedef struct
 	IDT *idt;
 } __attribute__((packed)) IDTR;
 
+typedef struct interrupt_frame interrupt_frame;
+
 // in cursor.c
 void undraw_cursor();
 void inc_cursor();
@@ -262,6 +265,7 @@ Pointer get_cursor_end_at();
 void draw_cursor();
 void cursor_next_line();
 void cursor_restart_line();
+void cursor_back();
 
 // in vdieo.c
 void init_vdieo(Video *video);
@@ -304,4 +308,16 @@ void io_out32(short port, unsigned int data);
 unsigned long long get_cr3();
 void get_gdtr(GDTR *gdtr);
 void get_idtr(IDTR *idtr);
+void set_idtr(IDTR *idtr);
+void set_gdtr(GDTR *gdtr);
+unsigned short get_cs();
+void closeInterrupt();
+void openInterrupt();
+
+// in interrupt.c
+void InitInterrupt();
+void AddAInterruptAt(void *offset, short SS, char ist, char TF, char at);
+
+// in keyboard.c
+void InitKeyboard();
 #endif

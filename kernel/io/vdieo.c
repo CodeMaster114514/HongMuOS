@@ -161,10 +161,13 @@ void put_char(char c)
 	{
 	case '\n':
 		cursor_next_line();
+		break;
 	case '\r':
 		cursor_restart_line();
+		break;
+	default:
+		draw_char(c);
 	}
-	draw_char(c);
 }
 
 int put_string(const char *str)

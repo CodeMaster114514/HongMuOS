@@ -344,7 +344,7 @@ typedef struct
 	Heap *heaps[4096 / sizeof(Heap *)];
 } HeapHeader;
 
-HeapHeader *header = (void *) -1;
+HeapHeader *header = (void *)-1;
 
 void clean_page(void *p)
 {
@@ -352,6 +352,15 @@ void clean_page(void *p)
 	for (int i = 0; i < 4096 / 8; i += 8)
 	{
 		data[i] = 0;
+	}
+}
+
+void set_page(void *p, long long data)
+{
+	long long *out = p;
+	for (int i = 0; i < 4096 / 8; ++i)
+	{
+		out[i] = data;
 	}
 }
 
@@ -370,23 +379,31 @@ void *alloc_os_data(unsigned long long len)
 	if (header == (void *)-1)
 	{
 		header = alloc_page(0x07, OsData);
-		clean_page(header);
+		set_page(header, -1);
 		header->heaps[0] = alloc_page(0x07, OsData);
 		clean_page(header->heaps[0]);
 	}
 	for (int i = 0; i < 4096 / sizeof(Heap *); ++i)
 	{
 		Heap *heap = header->heaps[i];
+		if (heap == (void *)-1)
+		{
+			header->heaps[i] = alloc_page(0x07, OsData);
+			clean_page(header->heaps[i]);
+			heap = header->heaps[i];
+		}
 		char done = 0;
-		while (1)
+		while(1)
 		{
 			if (heap - header->heaps[i] >= 0x1000)
 			{
 				break;
 			}
-			if ((!heap->have) && heap->len == 0)
+			if ((!heap->have) || heap->len == 0)
 			{
 				heap->len = len;
+				heap->have = -1;
+				done = -1;
 				break;
 			}
 			if ((!heap->have) && heap->len > len)
@@ -395,6 +412,8 @@ void *alloc_os_data(unsigned long long len)
 				int len = header->heaps[i] + 0x1000 - heap;
 				LeftDataByByte(offset, heap + heap->len, len);
 				heap->len = len;
+				heap->have = -1;
+				done = -1;
 				break;
 			}
 			heap += heap->len;
@@ -404,7 +423,7 @@ void *alloc_os_data(unsigned long long len)
 			return heap->targe;
 		}
 	}
-	return 0;
+	return (void *) -1;
 }
 
 void free(void *p)

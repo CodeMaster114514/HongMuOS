@@ -100,3 +100,48 @@ void get_idtr(IDTR *idtr)
 		:"=m"(idtr)
 	);
 }
+
+void set_idtr(IDTR *idtr)
+{
+	asm(
+		"mov rbx, %0\n\t"
+		"lidt [rbx]\n\t"
+		:
+		:"m"(idtr)
+	);
+}
+
+void set_gdtr(GDTR *gdtr)
+{
+	asm(
+		"mov rbx, %0\n\t"
+		"lgdt [rbx]\n\t"
+		:
+		:"m"(gdtr)
+	);
+}
+
+unsigned short get_cs()
+{
+	unsigned short data;
+	asm(
+		"mov ax, cs\n\t"
+		"mov %0, ax\n\t"
+		:"=m"(data)
+	);
+	return data;
+}
+
+void closeInterrupt()
+{
+	asm(
+		"cli\n\t"
+	);
+}
+
+void openInterrupt()
+{
+	asm(
+		"sti\n\t"
+	);
+}
