@@ -17,7 +17,7 @@ void Init8259A()
 	io_out8(0xa1, 0xff);
 }
 
-char shift = 0, capslock = 0;
+char shift = 0, capslock = 0, number = 0;
 
 __attribute__((interrupt))
 void IntKeyboard(interrupt_frame *frame)
@@ -234,18 +234,30 @@ void IntKeyboard(interrupt_frame *frame)
 		out = shift ? '?' : '/';
 		CanShow = -1;
 		break;
-	
-		shift = -1;
-		break;
 	case 0x37:// at keypad 
 		break;
-	case 0x38:
+	case 0x38://left alt
 		break;
 	case 0x39:
 		out = ' ';
 		CanShow = -1;
 		break;
 	case 0x3a:// Capslock
+		capslock = !capslock;
+		char set = 0;
+		if (capslock)
+		{
+			set |= 0b00000100;
+		}
+		if (number)
+		{
+			set |= 0b00001000;
+		}
+		io_out8(0x60, 0xed);
+		io_out8(0x60, set);
+		io_out8(0x60, 0xff);
+		io_out8(0x60, 0xf4);
+		io_out8(0x64, 0xae);
 		break;
 	case 0xaa:
 	case 0xb6:
