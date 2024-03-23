@@ -4,8 +4,12 @@ MAKEFILE_PATH :=$(abspath $(lastword $(MAKEFILE_LIST)))
 PWD :=$(subst /Makefile,,$(MAKEFILE_PATH))
 OUT_DIR :=$(PWD)/Build
 INCLUDE= $(PWD)/inc
+EFI_BUILD :=build
 
-all: Build/BootX64.efi Build/kernel
+all: Build/DEBUG_GCC5/$(ARCHITECTURE)/HongMuOSLoader.efi Build/kernel
+
+Build/DEBUG_GCC5/$(ARCHITECTURE)/HongMuOSLoader.efi:BootLoader/main.c BootLoader/GUI.c BootLoader/Protocol.c BootLoader/infomation.c BootLoader/enter.c BootLoader/File.c
+		$(EFI_BUILD) -p HongMuOS/HongMuOSLoader.dsc
 
 Build/BootX64.efi:BootLoader/main.c BootLoader/GUI.c BootLoader/Protocol.c BootLoader/infomation.c BootLoader/enter.c BootLoader/File.c
 

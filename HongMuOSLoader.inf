@@ -4,13 +4,12 @@
     FILE_GUID = 26C4B9E1-2C88-4EC3-BE6C-EDFF41C9F527
     MODULE_TYPE = UEFI_APPLICATION
     VERSION_STRING = 0.0.001
-    ENTRY_POINT = UefiMain
+    ENTRY_POINT = efi_main
 
 [Sources]
     BootLoader/main.c
     BootLoader/GUI.c
     BootLoader/Protocol.c
-    BootLoader/IO.c
     BootLoader/infomation.c
     BootLoader/enter.c
     BootLoader/File.c
